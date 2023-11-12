@@ -25,7 +25,11 @@
             <span class="likes-counter">3</span>
             <button class="like-button"></button>
           </div>
+          <button class="edit-button" data-comment-index="0">Редактировать</button>
         </div>
+        <textarea class="edit-comment-textarea" data-comment-index="0"
+          style="display: none;">Это будет первый комментарий на этой странице</textarea>
+        <button class="save-button" data-comment-index="0" style="display: none;">Сохранить</button>
       </li>
       <li class="comment">
         <div class="comment-header">
@@ -40,9 +44,13 @@
         <div class="comment-footer">
           <div class="likes">
             <span class="likes-counter">75</span>
-            <button class="like-button -active-like"></button>
+            <button class="like-button -active-like" data-comment-index="1"></button>
           </div>
+          <button class="edit-button" data-comment-index="1">Редактировать</button>
         </div>
+        <textarea class="edit-comment-textarea" data-comment-index="1"
+          style="display: none;">Мне нравится как оформлена эта страница! ❤</textarea>
+        <button class="save-button" data-comment-index="1" style="display: none;">Сохранить</button>
       </li>
     </ul>
     <div class="add-form">
@@ -57,8 +65,24 @@
 
   <script>
     "use strict";
-
     document.addEventListener("DOMContentLoaded", function () {
+      const commentsData = [
+        {
+          author: "Глеб Фокин",
+          date: "12.02.22 12:18",
+          text: "Это будет первый комментарий на этой странице",
+          likes: 3,
+          isLiked: false,
+        },
+        {
+          author: "Варвара Н.",
+          date: "13.02.22 19:22",
+          text: "Мне нравится как оформлена эта страница! ❤",
+          likes: 75,
+          isLiked: true,
+        }
+      ];
+
       const addButton = document.querySelector(".add-form-button");
       const nameInput = document.querySelector(".add-form-name");
       const textInput = document.querySelector(".add-form-text");
@@ -71,6 +95,24 @@
       nameInput.addEventListener("keyup", checkFormValidity);
       textInput.addEventListener("keyup", checkFormValidity);
 
+      document.addEventListener("click", function (event) {
+        const target = event.target;
+
+        if (target.classList.contains("like-button")) {
+          handleLikeButtonClick(target);
+        }
+
+        if (target.classList.contains("edit-button")) {
+          handleEditButtonClick(target);
+        }
+
+        if (target.classList.contains("save-button")) {
+          handleSaveButtonClick(target);
+        }
+      });
+
+      renderComments(commentsData);
+
       function addComment() {
         const name = nameInput.value;
         const text = textInput.value;
@@ -80,38 +122,63 @@
           return;
         }
 
-        const newComment = document.createElement("li");
-        newComment.className = "comment";
-        newComment.innerHTML = `
-            <div class="comment-header">
-              <div>${name}</div>
-              <div>${getCurrentDateTime()}</div>
-            </div>
-            <div class="comment-body">
-              <div class="comment-text">${text}</div>
-            </div>
-            <div class="comment-footer">
-              <div class="likes">
-                <span class="likes-counter">0</span>
-                <button class="like-button"></button>
-              </div>
-            </div>
-          `;
+        const newComment = {
+          author: name,
+          date: getCurrentDateTime(),
+          text: text,
+          likes: 0,
+          isLiked: false,
+        };
 
-        commentsList.appendChild(newComment);
+        commentsData.push(newComment);
+        renderComments(commentsData);
 
         nameInput.value = "";
         textInput.value = "";
 
-        checkFormValidity(); 
+        checkFormValidity();
       }
 
       function deleteLastComment() {
-        const lastComment = commentsList.lastElementChild;
-
-        if (lastComment) {
-          commentsList.removeChild(lastComment);
+        if (commentsData.length > 0) {
+          commentsData.pop();
+          renderComments(commentsData);
         }
+      }
+
+      function handleLikeButtonClick(button) {
+        const commentIndex = button.dataset.commentIndex;
+        if (commentIndex !== undefined) {
+          const comment = commentsData[commentIndex];
+          comment.isLiked = !comment.isLiked;
+          comment.likes = comment.isLiked ? comment.likes + 1 : comment.likes - 1;
+          renderComments(commentsData);
+        }
+      }
+
+      function handleEditButtonClick(button) {
+        const commentIndex = button.dataset.commentIndex;
+        const commentText = commentsData[commentIndex].text;
+
+        button.style.display = "none";
+        const commentTextElement = document.querySelector(`.comment-text[data-comment-index="${commentIndex}"]`);
+        commentTextElement.style.display = "none";
+
+        const editTextarea = document.querySelector(`.edit-comment-textarea[data-comment-index="${commentIndex}"]`);
+        editTextarea.value = commentText;
+        editTextarea.style.display = "block";
+
+        const saveButton = document.querySelector(`.save-button[data-comment-index="${commentIndex}"]`);
+        saveButton.style.display = "block";
+      }
+
+      function handleSaveButtonClick(button) {
+        const commentIndex = button.dataset.commentIndex;
+        const editedText = document.querySelector(`.edit-comment-textarea[data-comment-index="${commentIndex}"]`).value;
+
+        commentsData[commentIndex].text = editedText;
+
+        renderComments(commentsData);
       }
 
       function checkFormValidity() {
@@ -125,6 +192,33 @@
         const now = new Date();
         const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
         return now.toLocaleDateString("ru-RU", options);
+      }
+
+      function renderComments(comments) {
+        commentsList.innerHTML = "";
+        comments.forEach((comment, index) => {
+          const newComment = document.createElement("li");
+          newComment.className = "comment";
+          newComment.innerHTML = `
+            <div class="comment-header">
+              <div>${comment.author}</div>
+              <div>${comment.date}</div>
+            </div>
+            <div class="comment-body">
+              <div class="comment-text" data-comment-index="${index}">${comment.text}</div>
+              <textarea class="edit-comment-textarea" data-comment-index="${index}" style="display: none;">${comment.text}</textarea>
+            </div>
+            <div class="comment-footer">
+              <div class="likes">
+                <span class="likes-counter">${comment.likes}</span>
+                <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-comment-index="${index}"></button>
+              </div>
+              <button class="edit-button" data-comment-index="${index}">Редактировать</button>
+              <button class="save-button" data-comment-index="${index}" style="display: none;">Сохранить</button>
+            </div>
+          `;
+          commentsList.appendChild(newComment);
+        });
       }
     });
   </script>
