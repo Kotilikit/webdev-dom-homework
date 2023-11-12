@@ -1,71 +1,133 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Проект "Комменты"</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
 
-  <body>
-    <div class="container">
-      <ul class="comments">
-        <li class="comment">
-          <div class="comment-header">
-            <div>Глеб Фокин</div>
-            <div>12.02.22 12:18</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Это будет первый комментарий на этой странице
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">3</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>
-        <li class="comment">
-          <div class="comment-header">
-            <div>Варвара Н.</div>
-            <div>13.02.22 19:22</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Мне нравится как оформлена эта страница! ❤
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">75</span>
-              <button class="like-button -active-like"></button>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <div class="add-form">
-        <input
-          type="text"
-          class="add-form-name"
-          placeholder="Введите ваше имя"
-        />
-        <textarea
-          type="textarea"
-          class="add-form-text"
-          placeholder="Введите ваш коментарий"
-          rows="4"
-        ></textarea>
-        <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+<head>
+  <title>Проект "Комменты"</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="container">
+    <ul class="comments">
+      <li class="comment">
+        <div class="comment-header">
+          <div>Глеб Фокин</div>
+          <div>12.02.22 12:18</div>
         </div>
+        <div class="comment-body">
+          <div class="comment-text">
+            Это будет первый комментарий на этой странице
+          </div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter">3</span>
+            <button class="like-button"></button>
+          </div>
+        </div>
+      </li>
+      <li class="comment">
+        <div class="comment-header">
+          <div>Варвара Н.</div>
+          <div>13.02.22 19:22</div>
+        </div>
+        <div class="comment-body">
+          <div class="comment-text">
+            Мне нравится как оформлена эта страница! ❤
+          </div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter">75</span>
+            <button class="like-button -active-like"></button>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="add-form">
+      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
+      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+      <div class="add-form-row">
+        <button class="add-form-button" disabled>Написать</button>
       </div>
     </div>
-  </body>
+    <button class="delete-last-comment">Удалить последний комментарий</button>
+  </div>
 
   <script>
     "use strict";
-    // Код писать здесь
-    console.log("It works!");
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const addButton = document.querySelector(".add-form-button");
+      const nameInput = document.querySelector(".add-form-name");
+      const textInput = document.querySelector(".add-form-text");
+      const commentsList = document.querySelector(".comments");
+      const deleteButton = document.querySelector(".delete-last-comment");
+
+      addButton.addEventListener("click", addComment);
+      deleteButton.addEventListener("click", deleteLastComment);
+
+      nameInput.addEventListener("keyup", checkFormValidity);
+      textInput.addEventListener("keyup", checkFormValidity);
+
+      function addComment() {
+        const name = nameInput.value;
+        const text = textInput.value;
+
+        if (name.trim() === "" || text.trim() === "") {
+          alert("Пожалуйста, введите и имя, и комментарий!");
+          return;
+        }
+
+        const newComment = document.createElement("li");
+        newComment.className = "comment";
+        newComment.innerHTML = `
+            <div class="comment-header">
+              <div>${name}</div>
+              <div>${getCurrentDateTime()}</div>
+            </div>
+            <div class="comment-body">
+              <div class="comment-text">${text}</div>
+            </div>
+            <div class="comment-footer">
+              <div class="likes">
+                <span class="likes-counter">0</span>
+                <button class="like-button"></button>
+              </div>
+            </div>
+          `;
+
+        commentsList.appendChild(newComment);
+
+        nameInput.value = "";
+        textInput.value = "";
+
+        checkFormValidity(); 
+      }
+
+      function deleteLastComment() {
+        const lastComment = commentsList.lastElementChild;
+
+        if (lastComment) {
+          commentsList.removeChild(lastComment);
+        }
+      }
+
+      function checkFormValidity() {
+        const isFormValid = nameInput.value.trim() !== "" && textInput.value.trim() !== "";
+        addButton.disabled = !isFormValid;
+
+        addButton.style.backgroundColor = isFormValid ? "#bcec30" : "#ccc";
+      }
+
+      function getCurrentDateTime() {
+        const now = new Date();
+        const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
+        return now.toLocaleDateString("ru-RU", options);
+      }
+    });
   </script>
+</body>
+
 </html>
