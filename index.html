@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <title>Проект "Комменты"</title>
@@ -9,53 +9,10 @@
 
 <body>
   <div class="container">
-    <ul class="comments">
-      <li class="comment">
-        <div class="comment-header">
-          <div>Глеб Фокин</div>
-          <div>12.02.22 12:18</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Это будет первый комментарий на этой странице
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">3</span>
-            <button class="like-button"></button>
-          </div>
-          <button class="edit-button" data-comment-index="0">Редактировать</button>
-        </div>
-        <textarea class="edit-comment-textarea" data-comment-index="0"
-          style="display: none;">Это будет первый комментарий на этой странице</textarea>
-        <button class="save-button" data-comment-index="0" style="display: none;">Сохранить</button>
-      </li>
-      <li class="comment">
-        <div class="comment-header">
-          <div>Варвара Н.</div>
-          <div>13.02.22 19:22</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Мне нравится как оформлена эта страница! ❤
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">75</span>
-            <button class="like-button -active-like" data-comment-index="1"></button>
-          </div>
-          <button class="edit-button" data-comment-index="1">Редактировать</button>
-        </div>
-        <textarea class="edit-comment-textarea" data-comment-index="1"
-          style="display: none;">Мне нравится как оформлена эта страница! ❤</textarea>
-        <button class="save-button" data-comment-index="1" style="display: none;">Сохранить</button>
-      </li>
-    </ul>
+    <ul class="comments"></ul>
     <div class="add-form">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
       <div class="add-form-row">
         <button class="add-form-button" disabled>Написать</button>
       </div>
@@ -92,8 +49,8 @@
       addButton.addEventListener("click", addComment);
       deleteButton.addEventListener("click", deleteLastComment);
 
-      nameInput.addEventListener("keyup", checkFormValidity);
-      textInput.addEventListener("keyup", checkFormValidity);
+      nameInput.addEventListener("input", checkFormValidity);
+      textInput.addEventListener("input", checkFormValidity);
 
       document.addEventListener("click", function (event) {
         const target = event.target;
@@ -104,6 +61,10 @@
 
         if (target.classList.contains("edit-button")) {
           handleEditButtonClick(target);
+        }
+
+        if (target.classList.contains("reply-button")) {
+          handleReplyButtonClick(target);
         }
 
         if (target.classList.contains("save-button")) {
@@ -123,9 +84,9 @@
         }
 
         const newComment = {
-          author: name,
+          author: escapeHTML(name),
           date: getCurrentDateTime(),
-          text: text,
+          text: escapeHTML(text),
           likes: 0,
           isLiked: false,
         };
@@ -172,12 +133,28 @@
         saveButton.style.display = "block";
       }
 
+      function handleReplyButtonClick(button) {
+        const commentIndex = button.dataset.commentIndex;
+        const commentAuthor = commentsData[commentIndex].author;
+        const commentText = commentsData[commentIndex].text;
+
+        const quotedComment = `
+          <div class="quote">
+            <div>${commentAuthor}</div>
+            <div>${commentText}</div>
+          </div>
+        `;
+
+        const currentText = textInput.value;
+        textInput.value = `${quotedComment}\n${currentText}`;
+        textInput.focus();
+      }
+
       function handleSaveButtonClick(button) {
         const commentIndex = button.dataset.commentIndex;
         const editedText = document.querySelector(`.edit-comment-textarea[data-comment-index="${commentIndex}"]`).value;
 
-        commentsData[commentIndex].text = editedText;
-
+        commentsData[commentIndex].text = escapeHTML(editedText);
         renderComments(commentsData);
       }
 
@@ -205,7 +182,7 @@
               <div>${comment.date}</div>
             </div>
             <div class="comment-body">
-              <div class="comment-text" data-comment-index="${index}">${comment.text}</div>
+              <div class="comment-text" data-comment-index="${index}" style="white-space: pre-line;">${processQuotes(comment.text)}</div>
               <textarea class="edit-comment-textarea" data-comment-index="${index}" style="display: none;">${comment.text}</textarea>
             </div>
             <div class="comment-footer">
@@ -215,9 +192,26 @@
               </div>
               <button class="edit-button" data-comment-index="${index}">Редактировать</button>
               <button class="save-button" data-comment-index="${index}" style="display: none;">Сохранить</button>
+              <button class="reply-button" data-comment-index="${index}">Ответить</button>
             </div>
           `;
           commentsList.appendChild(newComment);
+        });
+      }
+
+      function processQuotes(text) {
+        return text.replaceAll("BEGIN_QUOTE", "<div class='quote'>");
+      }
+
+      function escapeHTML(text) {
+        return text.replace(/[&<>"']/g, function (match) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[match];
         });
       }
     });
