@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <title>Проект "Комменты"</title>
@@ -9,53 +9,10 @@
 
 <body>
   <div class="container">
-    <ul class="comments">
-      <li class="comment">
-        <div class="comment-header">
-          <div>Глеб Фокин</div>
-          <div>12.02.22 12:18</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Это будет первый комментарий на этой странице
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">3</span>
-            <button class="like-button"></button>
-          </div>
-          <button class="edit-button" data-comment-index="0">Редактировать</button>
-        </div>
-        <textarea class="edit-comment-textarea" data-comment-index="0"
-          style="display: none;">Это будет первый комментарий на этой странице</textarea>
-        <button class="save-button" data-comment-index="0" style="display: none;">Сохранить</button>
-      </li>
-      <li class="comment">
-        <div class="comment-header">
-          <div>Варвара Н.</div>
-          <div>13.02.22 19:22</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            Мне нравится как оформлена эта страница! ❤
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">75</span>
-            <button class="like-button -active-like" data-comment-index="1"></button>
-          </div>
-          <button class="edit-button" data-comment-index="1">Редактировать</button>
-        </div>
-        <textarea class="edit-comment-textarea" data-comment-index="1"
-          style="display: none;">Мне нравится как оформлена эта страница! ❤</textarea>
-        <button class="save-button" data-comment-index="1" style="display: none;">Сохранить</button>
-      </li>
-    </ul>
+    <ul class="comments"></ul>
     <div class="add-form">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
       <div class="add-form-row">
         <button class="add-form-button" disabled>Написать</button>
       </div>
