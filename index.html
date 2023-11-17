@@ -59,16 +59,24 @@
           handleLikeButtonClick(target);
         }
 
-        if (target.classList.contains("edit-button")) {
-          handleEditButtonClick(target);
-        }
-
         if (target.classList.contains("reply-button")) {
           handleReplyButtonClick(target);
         }
 
+        if (target.classList.contains("edit-button")) {
+          handleEditButtonClick(target);
+        }
+
         if (target.classList.contains("save-button")) {
           handleSaveButtonClick(target);
+        }
+
+        if (!target.closest(".comment-footer") && !target.classList.contains("edit-comment-textarea")) {
+          // Проверяем, что клик был не по кнопкам внутри комментария
+          const commentIndex = target.closest(".comment") ? target.closest(".comment").querySelector(".reply-button").dataset.commentIndex : null;
+          if (commentIndex !== null) {
+            handleReplyButtonClick(target.closest(".comment").querySelector(`.reply-button[data-comment-index="${commentIndex}"]`));
+          }
         }
       });
 
@@ -117,22 +125,6 @@
         }
       }
 
-      function handleEditButtonClick(button) {
-        const commentIndex = button.dataset.commentIndex;
-        const commentText = commentsData[commentIndex].text;
-
-        button.style.display = "none";
-        const commentTextElement = document.querySelector(`.comment-text[data-comment-index="${commentIndex}"]`);
-        commentTextElement.style.display = "none";
-
-        const editTextarea = document.querySelector(`.edit-comment-textarea[data-comment-index="${commentIndex}"]`);
-        editTextarea.value = commentText;
-        editTextarea.style.display = "block";
-
-        const saveButton = document.querySelector(`.save-button[data-comment-index="${commentIndex}"]`);
-        saveButton.style.display = "block";
-      }
-
       function handleReplyButtonClick(button) {
         const commentIndex = button.dataset.commentIndex;
         const commentAuthor = commentsData[commentIndex].author;
@@ -146,8 +138,25 @@
         `;
 
         const currentText = textInput.value;
-        textInput.value = `${quotedComment}\n${currentText}`;
+        textInput.value = `${currentText}${quotedComment}\n`;
         textInput.focus();
+      }
+
+      function handleEditButtonClick(button) {
+        const commentIndex = button.dataset.commentIndex;
+        const commentText = commentsData[commentIndex].text;
+
+        const commentTextElement = document.querySelector(`.comment-text[data-comment-index="${commentIndex}"]`);
+        commentTextElement.style.display = "none";
+
+        const editTextarea = document.querySelector(`.edit-comment-textarea[data-comment-index="${commentIndex}"]`);
+        editTextarea.value = commentText;
+        editTextarea.style.display = "block";
+
+        button.style.display = "none";
+
+        const saveButton = document.querySelector(`.save-button[data-comment-index="${commentIndex}"]`);
+        saveButton.style.display = "block";
       }
 
       function handleSaveButtonClick(button) {
