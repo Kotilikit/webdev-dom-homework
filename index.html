@@ -9,46 +9,31 @@
 
 <body>
   <div class="container">
-    <ul class="comments"></ul>
+    <ul class="comments" id="commentList">
+    </ul>
     <div class="add-form">
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
+      <input type="text" class="add-form-name" id="nameInput" placeholder="Введите ваше имя" />
+      <textarea class="add-form-text" id="commentInput" placeholder="Введите ваш комментарий" rows="4"></textarea>
       <div class="add-form-row">
-        <button class="add-form-button" disabled>Написать</button>
+        <button class="add-form-button" id="submitButton" disabled>Написать</button>
       </div>
     </div>
-    <button class="delete-last-comment">Удалить последний комментарий</button>
+    <button class="delete-last-comment" id="deleteLastCommentButton">Удалить последний комментарий</button>
   </div>
 
   <script>
     "use strict";
     document.addEventListener("DOMContentLoaded", function () {
-      const commentsData = [
-        {
-          author: "Глеб Фокин",
-          date: "12.02.22 12:18",
-          text: "Это будет первый комментарий на этой странице",
-          likes: 3,
-          isLiked: false,
-        },
-        {
-          author: "Варвара Н.",
-          date: "13.02.22 19:22",
-          text: "Мне нравится как оформлена эта страница! ❤",
-          likes: 75,
-          isLiked: true,
-        }
-      ];
+      const addButton = document.getElementById("submitButton");
+      const deleteButton = document.getElementById("deleteLastCommentButton");
+      const nameInput = document.getElementById("nameInput");
+      const textInput = document.getElementById("commentInput");
+      const commentsList = document.getElementById("commentList");
 
-      const addButton = document.querySelector(".add-form-button");
-      const nameInput = document.querySelector(".add-form-name");
-      const textInput = document.querySelector(".add-form-text");
-      const commentsList = document.querySelector(".comments");
-      const deleteButton = document.querySelector(".delete-last-comment");
+      let commentsData = [];
 
       addButton.addEventListener("click", addComment);
       deleteButton.addEventListener("click", deleteLastComment);
-
       nameInput.addEventListener("input", checkFormValidity);
       textInput.addEventListener("input", checkFormValidity);
 
@@ -72,7 +57,6 @@
         }
 
         if (!target.closest(".comment-footer") && !target.classList.contains("edit-comment-textarea")) {
-          // Проверяем, что клик был не по кнопкам внутри комментария
           const commentIndex = target.closest(".comment") ? target.closest(".comment").querySelector(".reply-button").dataset.commentIndex : null;
           if (commentIndex !== null) {
             handleReplyButtonClick(target.closest(".comment").querySelector(`.reply-button[data-comment-index="${commentIndex}"]`));
@@ -80,7 +64,35 @@
         }
       });
 
-      renderComments(commentsData);
+      function getCommentsFromAPI() {
+        fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+          method: "GET",
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Ошибка сети: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((responseData) => {
+            const getApiComments = responseData.comments.map((comment) => {
+              return {
+                author: comment.author.name,
+                date: new Date(comment.date),
+                likes: comment.likes,
+                isLiked: false,
+                text: comment.text,
+              };
+            });
+            commentsData = getApiComments;
+            renderComments(commentsData);
+          })
+          .catch((error) => {
+            console.error('Ошибка при получении комментариев:', error);
+          });
+      }
+
+      getCommentsFromAPI();
 
       function addComment() {
         const name = nameInput.value;
@@ -99,8 +111,25 @@
           isLiked: false,
         };
 
-        commentsData.push(newComment);
-        renderComments(commentsData);
+        fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+          method: "POST",
+          body: JSON.stringify({
+            name: newComment.author,
+            text: newComment.text,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Ошибка сети: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((responseData) => {
+            getCommentsFromAPI();
+          })
+          .catch((error) => {
+            console.error('Ошибка при отправке комментария:', error);
+          });
 
         nameInput.value = "";
         textInput.value = "";
@@ -170,7 +199,6 @@
       function checkFormValidity() {
         const isFormValid = nameInput.value.trim() !== "" && textInput.value.trim() !== "";
         addButton.disabled = !isFormValid;
-
         addButton.style.backgroundColor = isFormValid ? "#bcec30" : "#ccc";
       }
 
