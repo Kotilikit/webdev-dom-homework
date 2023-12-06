@@ -33,7 +33,7 @@
       <textarea class="add-form-text" id="commentInput" placeholder="Введите ваш комментарий" rows="4"></textarea>
       <div class="add-form-row">
         <button class="add-form-button" id="submitButton" disabled>Написать</button>
-        <div class="loader" id="loader" style="display: none;"></div>
+        <div class="loader" id="loader"></div>
       </div>
     </div>
     <button class="delete-last-comment" id="deleteLastCommentButton">Удалить последний комментарий</button>
@@ -47,6 +47,7 @@
       const nameInput = document.getElementById("nameInput");
       const textInput = document.getElementById("commentInput");
       const commentsList = document.getElementById("commentList");
+      const loader = document.getElementById("loader");
 
       let commentsData = [];
 
@@ -82,7 +83,16 @@
         }
       });
 
+      function showLoader() {
+        loader.style.display = "inline-block";
+      }
+
+      function hideLoader() {
+        loader.style.display = "none";
+      }
+
       function getCommentsFromAPI() {
+        showLoader();
         return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
           method: "GET",
         })
@@ -114,13 +124,13 @@
 
       function loadComments() {
         console.log('Загрузка комментариев...');
-
         return getComments()
           .then((comments) => {
             commentsData = comments;
             renderComments(commentsData);
           })
           .finally(() => {
+            hideLoader();
             console.log('Комментарии загружены.');
           });
       }
@@ -137,7 +147,7 @@
         }
 
         addButton.disabled = true;
-        document.getElementById("loader").style.display = "inline-block";
+        showLoader();
 
         const newComment = {
           author: escapeHTML(name),
@@ -170,7 +180,7 @@
           })
           .finally(() => {
             addButton.disabled = false;
-            document.getElementById("loader").style.display = "none";
+            hideLoader();
             console.log('Комментарий отправлен.');
           });
 
