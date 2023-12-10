@@ -5,6 +5,23 @@
   <title>Проект "Комменты"</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: none;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 
 <body>
@@ -16,6 +33,7 @@
       <textarea class="add-form-text" id="commentInput" placeholder="Введите ваш комментарий" rows="4"></textarea>
       <div class="add-form-row">
         <button class="add-form-button" id="submitButton" disabled>Написать</button>
+        <div class="loader" id="loader"></div>
       </div>
     </div>
     <button class="delete-last-comment" id="deleteLastCommentButton">Удалить последний комментарий</button>
@@ -29,6 +47,7 @@
       const nameInput = document.getElementById("nameInput");
       const textInput = document.getElementById("commentInput");
       const commentsList = document.getElementById("commentList");
+      const loader = document.getElementById("loader");
 
       let commentsData = [];
 
@@ -64,8 +83,17 @@
         }
       });
 
+      function showLoader() {
+        loader.style.display = "inline-block";
+      }
+
+      function hideLoader() {
+        loader.style.display = "none";
+      }
+
       function getCommentsFromAPI() {
-        fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+        showLoader();
+        return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
           method: "GET",
         })
           .then((response) => {
@@ -73,9 +101,13 @@
               throw new Error(`Ошибка сети: ${response.status}`);
             }
             return response.json();
-          })
+          });
+      }
+
+      function getComments() {
+        return getCommentsFromAPI()
           .then((responseData) => {
-            const getApiComments = responseData.comments.map((comment) => {
+            return responseData.comments.map((comment) => {
               return {
                 author: comment.author.name,
                 date: new Date(comment.date),
@@ -84,17 +116,28 @@
                 text: comment.text,
               };
             });
-            commentsData = getApiComments;
-            renderComments(commentsData);
           })
           .catch((error) => {
             console.error('Ошибка при получении комментариев:', error);
           });
       }
 
-      getCommentsFromAPI();
+      function loadComments() {
+        console.log('Загрузка комментариев...');
+        return getComments()
+          .then((comments) => {
+            commentsData = comments;
+            renderComments(commentsData);
+          })
+          .finally(() => {
+            hideLoader();
+            console.log('Комментарии загружены.');
+          });
+      }
 
       function addComment() {
+        console.log('Отправка комментария...');
+
         const name = nameInput.value;
         const text = textInput.value;
 
@@ -102,6 +145,9 @@
           alert("Пожалуйста, введите и имя, и комментарий!");
           return;
         }
+
+        addButton.disabled = true;
+        showLoader();
 
         const newComment = {
           author: escapeHTML(name),
@@ -111,7 +157,7 @@
           isLiked: false,
         };
 
-        fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+        return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
           method: "POST",
           body: JSON.stringify({
             name: newComment.author,
@@ -124,11 +170,18 @@
             }
             return response.json();
           })
-          .then((responseData) => {
-            getCommentsFromAPI();
+          .then(() => getComments())
+          .then((comments) => {
+            commentsData = comments;
+            renderComments(commentsData);
           })
           .catch((error) => {
             console.error('Ошибка при отправке комментария:', error);
+          })
+          .finally(() => {
+            addButton.disabled = false;
+            hideLoader();
+            console.log('Комментарий отправлен.');
           });
 
         nameInput.value = "";
@@ -142,6 +195,56 @@
           commentsData.pop();
           renderComments(commentsData);
         }
+      }
+
+      function getCurrentDateTime() {
+        const now = new Date();
+        const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
+        return now.toLocaleDateString("ru-RU", options);
+      }
+
+      function renderComments(comments) {
+        commentsList.innerHTML = "";
+        comments.forEach((comment, index) => {
+          const newComment = document.createElement("li");
+          newComment.className = "comment";
+          newComment.innerHTML = `
+            <div class="comment-header">
+              <div>${comment.author}</div>
+              <div>${comment.date}</div>
+            </div>
+            <div class="comment-body">
+              <div class="comment-text" data-comment-index="${index}" style="white-space: pre-line;">${processQuotes(comment.text)}</div>
+              <textarea class="edit-comment-textarea" data-comment-index="${index}" style="display: none;">${comment.text}</textarea>
+            </div>
+            <div class="comment-footer">
+              <div class="likes">
+                <span class="likes-counter">${comment.likes}</span>
+                <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-comment-index="${index}"></button>
+              </div>
+              <button class="edit-button" data-comment-index="${index}">Редактировать</button>
+              <button class="save-button" data-comment-index="${index}" style="display: none;">Сохранить</button>
+              <button class="reply-button" data-comment-index="${index}">Ответить</button>
+            </div>
+          `;
+          commentsList.appendChild(newComment);
+        });
+      }
+
+      function processQuotes(text) {
+        return text.replaceAll("BEGIN_QUOTE", "<div class='quote'>");
+      }
+
+      function escapeHTML(text) {
+        return text.replace(/[&<>"']/g, function (match) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[match];
+        });
       }
 
       function handleLikeButtonClick(button) {
@@ -202,55 +305,7 @@
         addButton.style.backgroundColor = isFormValid ? "#bcec30" : "#ccc";
       }
 
-      function getCurrentDateTime() {
-        const now = new Date();
-        const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
-        return now.toLocaleDateString("ru-RU", options);
-      }
-
-      function renderComments(comments) {
-        commentsList.innerHTML = "";
-        comments.forEach((comment, index) => {
-          const newComment = document.createElement("li");
-          newComment.className = "comment";
-          newComment.innerHTML = `
-            <div class="comment-header">
-              <div>${comment.author}</div>
-              <div>${comment.date}</div>
-            </div>
-            <div class="comment-body">
-              <div class="comment-text" data-comment-index="${index}" style="white-space: pre-line;">${processQuotes(comment.text)}</div>
-              <textarea class="edit-comment-textarea" data-comment-index="${index}" style="display: none;">${comment.text}</textarea>
-            </div>
-            <div class="comment-footer">
-              <div class="likes">
-                <span class="likes-counter">${comment.likes}</span>
-                <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-comment-index="${index}"></button>
-              </div>
-              <button class="edit-button" data-comment-index="${index}">Редактировать</button>
-              <button class="save-button" data-comment-index="${index}" style="display: none;">Сохранить</button>
-              <button class="reply-button" data-comment-index="${index}">Ответить</button>
-            </div>
-          `;
-          commentsList.appendChild(newComment);
-        });
-      }
-
-      function processQuotes(text) {
-        return text.replaceAll("BEGIN_QUOTE", "<div class='quote'>");
-      }
-
-      function escapeHTML(text) {
-        return text.replace(/[&<>"']/g, function (match) {
-          return {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-          }[match];
-        });
-      }
+      loadComments(); 
     });
   </script>
 </body>
