@@ -117,9 +117,7 @@
               };
             });
           })
-          .catch((error) => {
-            console.error('Ошибка при получении комментариев:', error);
-          });
+          .catch((error) => handleGetCommentsError(error));
       }
 
       function loadComments() {
@@ -162,6 +160,7 @@
           body: JSON.stringify({
             name: newComment.author,
             text: newComment.text,
+            forceError: true,
           }),
         })
           .then((response) => {
@@ -175,9 +174,7 @@
             commentsData = comments;
             renderComments(commentsData);
           })
-          .catch((error) => {
-            console.error('Ошибка при отправке комментария:', error);
-          })
+          .catch((error) => handlePostError(error))
           .finally(() => {
             addButton.disabled = false;
             hideLoader();
@@ -188,6 +185,14 @@
         textInput.value = "";
 
         checkFormValidity();
+      }
+
+      function handlePostError(error) {
+        if (error.message.includes("400")) {
+          alert("Имя и комментарий должны быть не короче 3-х символов.");
+        } else {
+          alert("Ошибка при отправке комментария. Пожалуйста, попробуйте еще раз.");
+        }
       }
 
       function deleteLastComment() {
@@ -305,7 +310,25 @@
         addButton.style.backgroundColor = isFormValid ? "#bcec30" : "#ccc";
       }
 
-      loadComments(); 
+      function handleNetworkError() {
+        alert("Ошибка: Произошла проблема с сетью. Проверьте ваше интернет-соединение.");
+      }
+
+      function getCommentsFromAPI() {
+        showLoader();
+        return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+          method: "GET",
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Ошибка сети: ${response.status}`);
+            }
+            return response.json();
+          })
+          .catch(handleNetworkError);
+      }
+
+      loadComments();
     });
   </script>
 </body>
