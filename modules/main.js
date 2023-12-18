@@ -6,10 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const nameInput = document.getElementById("nameInput");
   const textInput = document.getElementById("commentInput");
 
-  addButton.addEventListener("click", function () {
-    addComment(nameInput.value, textInput.value);
-  });
-
+  addButton.addEventListener("click", addComment);
   deleteButton.addEventListener("click", deleteLastComment);
   nameInput.addEventListener("input", checkFormValidity);
   textInput.addEventListener("input", checkFormValidity);
@@ -43,4 +40,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
   loadComments();
 });
-

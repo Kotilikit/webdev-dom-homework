@@ -1,4 +1,6 @@
 import { showLoader, hideLoader, getCommentsFromAPI } from './apiModule.js';
+import { escapeHTML, getCurrentDateTime } from './utils.js';
+import { sendCommentToAPI } from './postModule.js';
 
 let commentsData = [];
 const commentsList = document.getElementById("commentList");
@@ -24,14 +26,22 @@ export function loadComments() {
     });
 }
 
-export function addComment(name, text) {
+export function addComment() {
   console.log('Отправка комментария...');
+
+  const addButton = document.getElementById("submitButton");
+  const nameInput = document.getElementById("nameInput");
+  const textInput = document.getElementById("commentInput");
+
+  const name = nameInput.value;
+  const text = textInput.value;
 
   if (name.trim() === "" || text.trim() === "") {
     alert("Пожалуйста, введите и имя, и комментарий!");
-    return Promise.reject("Не введены имя или комментарий");
+    return;
   }
 
+  addButton.disabled = true;
   showLoader();
 
   const newComment = {
@@ -42,40 +52,22 @@ export function addComment(name, text) {
     isLiked: false,
   };
 
-  return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
-    method: "POST",
-    body: JSON.stringify({
-      name: newComment.author,
-      text: newComment.text,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Ошибка сети: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(() => getCommentsFromAPI())
-    .then((responseData) => {
-      commentsData = responseData.comments.map((comment) => {
-        return {
-          author: comment.author.name,
-          date: new Date(comment.date),
-          likes: comment.likes,
-          isLiked: false,
-          text: comment.text,
-        };
-      });
+  sendCommentToAPI(newComment)
+    .then(() => {
+      commentsData.push(newComment);
       renderComments(commentsData);
     })
-    .catch((error) => {
-      handlePostError(error);
-      throw error;
-    })
+    .catch((error) => handlePostError(error))
     .finally(() => {
+      addButton.disabled = false;
       hideLoader();
       console.log('Комментарий отправлен.');
     });
+
+  nameInput.value = "";
+  textInput.value = "";
+
+  checkFormValidity();
 }
 
 export function deleteLastComment() {
@@ -177,22 +169,4 @@ function renderComments(comments) {
 
 function processQuotes(text) {
   return text.replaceAll("BEGIN_QUOTE", "<div class='quote'>");
-}
-
-function escapeHTML(text) {
-  return text.replace(/[&<>"']/g, function (match) {
-    return {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    }[match];
-  });
-}
-
-function getCurrentDateTime() {
-  const now = new Date();
-  const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
-  return now.toLocaleDateString("ru-RU", options);
 }
