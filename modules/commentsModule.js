@@ -1,6 +1,5 @@
-import { showLoader, hideLoader, getCommentsFromAPI } from './apiModule.js';
+import { showLoader, hideLoader, getCommentsFromAPI, sendCommentToAPI } from './apiModule.js';
 import { escapeHTML, getCurrentDateTime } from './utils.js';
-import { sendCommentToAPI } from './postModule.js';
 
 let commentsData = [];
 const commentsList = document.getElementById("commentList");
