@@ -56,10 +56,12 @@ body {
 .comment-body {
   margin-top: 32px;
   margin-bottom: 32px;
+
 }
 
 .comment-text {
   font-size: 32px;
+  white-space: pre-line;
 }
 
 .likes {
@@ -117,7 +119,7 @@ body {
 
 .add-form-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .add-form-button {
@@ -148,23 +150,9 @@ body {
   opacity: 0.9;
 }
 
-.edit-button {
-  margin-top: 24px;
-  font-size: 12px;
-  padding: 10px 20px;
-  background-color: #bcec30;
-  border: none;
-  border-radius: 18px;
-  cursor: pointer;
-}
-
-.edit-button:hover {
-  opacity: 0.9;
-}
-
 .save-button {
   margin-top: 24px;
-  font-size: 12px;
+  font-size: 24px;
   padding: 10px 20px;
   background-color: #bcec30;
   border: none;
@@ -176,36 +164,52 @@ body {
   opacity: 0.9;
 }
 
-.edit-comment-textarea {
-  background-color: rgba(255, 255, 255, 0);
-  color: white;
+.error {
+  background-color: rgb(202, 202, 202);
+}
+
+.loading-add {
+  width: 596px;
+  height: 50px;
+  text-align: center;
+  box-sizing: border-box;
+  background: radial-gradient(75.42% 75.42% at 50% 42.37%,
+      rgba(53, 53, 53, 0) 22.92%,
+      #7334ea 100%);
+  filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+  border-radius: 20px;
+}
+
+.text-load {
+  width: 596px;
+  height: 50px;
+  text-align: center;
+  box-sizing: border-box;
+  background: radial-gradient(75.42% 75.42% at 50% 42.37%,
+      rgba(53, 53, 53, 0) 22.92%,
+      #7334ea 100%);
+  filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+  border-radius: 20px;
+  display: none;
+  color: rgb(255, 255, 255)
+}
+
+.comment-body[data-edit] .add-form-text {
   font-size: 32px;
+  text-align: center;
+  color: #ffffff;
+  white-space: pre-line;
+  margin-top: 0;
+  padding: 0;
   border: none;
-  padding: 10px;
+  background: radial-gradient(
+    75.42% 75.42% at 50% 42.37%,
+    rgba(53, 53, 53, 0) 22.92%,
+    #7334ea 100%
+  );
+  filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+  border-radius: 20px;
   width: 100%;
   box-sizing: border-box;
 }
 
-.comment-text {
-  white-space: pre-line;
-}
-
-.reply-button {
-  margin-top: 24px;
-  font-size: 12px;
-  padding: 10px 20px;
-  background-color: #bcec30;
-  border: none;
-  border-radius: 18px;
-  cursor: pointer;
-}
-
-.reply-button:hover {
-  opacity: 0.9;
-}
-
-.quote {
-  border-left: 2px solid #ccc;
-  padding-left: 10px;
-  margin: 10px 0;
-}
