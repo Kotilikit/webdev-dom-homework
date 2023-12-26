@@ -1,42 +1,41 @@
-import { loadComments, addComment, deleteLastComment, handleLikeButtonClick, handleReplyButtonClick, handleEditButtonClick, handleSaveButtonClick, checkFormValidity } from './commentsModule.js';
+import { addedComments } from "./api.js";
+import { disablingButton } from "./utils.js";
+import { sedingsServer } from "./api.js";
+import { arrayOfComments } from "./api.js";
+import { renderChangingMarkup } from "./render.js";
+const button = document.querySelector(".add-form-button");
+const deleteLastComment = document.querySelector(".delete-last-comment");
+const inputName = document.querySelector(".add-form-name");
+const inputComments = document.querySelector(".add-form-text");
+const textElementsLoad = document.querySelector(".text-load");
+textElementsLoad.style.display = "block";
 
-document.addEventListener("DOMContentLoaded", function () {
-  const addButton = document.getElementById("submitButton");
-  const deleteButton = document.getElementById("deleteLastCommentButton");
-  const nameInput = document.getElementById("nameInput");
-  const textInput = document.getElementById("commentInput");
+addedComments();
 
-  addButton.addEventListener("click", addComment);
-  deleteButton.addEventListener("click", deleteLastComment);
-  nameInput.addEventListener("input", checkFormValidity);
-  textInput.addEventListener("input", checkFormValidity);
-
-  document.addEventListener("click", function (event) {
-    const target = event.target;
-
-    if (target.classList.contains("like-button")) {
-      handleLikeButtonClick(target);
+button.addEventListener("click", () => {
+    inputName.classList.remove("error");
+    if (inputName.value === "") {
+        inputName.classList.add("error");
+    }
+    inputComments.classList.remove("error");
+    if (inputComments.value === "") {
+        inputComments.classList.add("error");
+        return;
     }
 
-    if (target.classList.contains("reply-button")) {
-      handleReplyButtonClick(target);
+    if (inputName.value === " ") {
+        return inputName.value.trim();
     }
-
-    if (target.classList.contains("edit-button")) {
-      handleEditButtonClick(target);
+    if (inputComments.value === " ") {
+        return inputComments.value.trim();
     }
-
-    if (target.classList.contains("save-button")) {
-      handleSaveButtonClick(target);
-    }
-
-    if (!target.closest(".comment-footer") && !target.classList.contains("edit-comment-textarea")) {
-      const commentIndex = target.closest(".comment") ? target.closest(".comment").querySelector(".reply-button").dataset.commentIndex : null;
-      if (commentIndex !== null) {
-        handleReplyButtonClick(target.closest(".comment").querySelector(`.reply-button[data-comment-index="${commentIndex}"]`));
-      }
-    }
-  });
-
-  loadComments();
+    sedingsServer();
 });
+
+deleteLastComment.addEventListener("click", () => {
+    arrayOfComments.splice(arrayOfComments.length - 1, 1);
+    renderChangingMarkup();
+});
+
+inputName.addEventListener("input", disablingButton);
+inputComments.addEventListener("input", disablingButton);

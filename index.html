@@ -1,39 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
   <title>Проект "Комменты"</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      display: none;
-      margin-left: 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
 </head>
 
 <body>
   <div class="container">
-    <ul class="comments" id="commentList">
+    <div class="text-load">
+      <p>Обновление ленты комментариев пожалуйста подождите!</p>
+    </div>
+    <ul class="comments">
     </ul>
+    <br />
+    <div style="display: none; color: rgb(255, 255, 255)" class="loading-add">
+      <p>Комментарий добавляется</p>
+    </div>
     <div class="add-form">
-      <input type="text" class="add-form-name" id="nameInput" placeholder="Введите ваше имя" />
-      <textarea class="add-form-text" id="commentInput" placeholder="Введите ваш комментарий" rows="4"></textarea>
+      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
+      <textarea id="text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
+        rows="4"></textarea>
       <div class="add-form-row">
-        <button class="add-form-button" id="submitButton" disabled>Написать</button>
-        <div class="loader" id="loader"></div>
+        <button class="add-form-button">Написать</button>
       </div>
     </div>
     <button class="delete-last-comment" id="deleteLastCommentButton">Удалить последний комментарий</button>
