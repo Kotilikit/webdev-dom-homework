@@ -1,19 +1,42 @@
 import { currentDate } from "./utils.js";
 import { renderChangingMarkup } from "./render.js";
+
 const textElementsLoad = document.querySelector(".text-load");
-const inputName = document.querySelector(".add-form-name");
-const inputComments = document.querySelector(".add-form-text");
+const inputName = document.getElementById("form-name");
+const inputComments = document.getElementById("form-text");
 const button = document.querySelector(".add-form-button");
 const loadingElements = document.querySelector(".loading-add");
-const formElements = document.querySelector(".add-form");
+
+const url = "https://wedev-api.sky.pro/api/v2/daniil-kit/comments/";
+const userUrl = "https://wedev-api.sky.pro/api/user/login";
+
+export let token;
+export function userToken(newToken) {
+  token = newToken;
+}
+
+export let id;
+
+export function userId(newId) {
+  id = newId;
+}
+
+export let name;
+
+export function userName(newName) {
+  name = newName
+}
 
 export { arrayOfComments };
 
 let arrayOfComments = [];
 
 export const addedComments = () => {
-  return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+  return fetch(url, {
     method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   })
     .then((response) => {
       return response.json();
@@ -23,6 +46,8 @@ export const addedComments = () => {
       return response;
     })
     .then((responseCommets) => {
+
+
       const massComments = responseCommets.comments.map((comment) => {
         return {
           name: comment.author.name,
@@ -31,22 +56,23 @@ export const addedComments = () => {
           likes: comment.likes,
           islover: false,
           isEdit: false,
+          id: comment.id,
         };
       });
 
       arrayOfComments = massComments;
       renderChangingMarkup();
+
       console.log(arrayOfComments);
     })
-    .catch((error) => {
-      alert("Произошла проблема с сетью. Проверьте ваше интернет-соединение.");
-      console.error(error);
-    });
 };
 
 export const addTodo = (name, text) => {
-  return fetch("https://wedev-api.sky.pro/api/v1/daniil-kit/comments", {
+  return fetch(url, {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({
       text: text
         .replaceAll("&", "&amp;")
@@ -64,6 +90,10 @@ export const addTodo = (name, text) => {
 };
 
 export const sedingsServer = () => {
+  const formElements = document.getElementById("add-form");
+  const inputName = document.getElementById("form-name");
+  const inputComments = document.getElementById("form-text");
+  const loadingElements = document.querySelector(".loading-add");
   loadingElements.style.display = "block";
   formElements.style.display = "none";
 
@@ -84,7 +114,7 @@ export const sedingsServer = () => {
       }
     })
     .then(() => {
-      return addedComments();
+      return addedComments(); 
     })
     .then(() => {
       button.disabled = true;
@@ -94,14 +124,12 @@ export const sedingsServer = () => {
       formElements.style.display = "flex";
     })
     .catch((error) => {
-      loadingElements.style.display = "block";
-      formElements.style.display = "none";
+      loadingElements.style.display = "none";
+      formElements.style.display = "flex";
       if (error.message === "Неверный ввод") {
         alert("Имя и комментарий должны быть не короче 3 символов");
       } else if (error.message === "Ошибка сервера") {
         addTodoError();
-      } else {
-        alert("Произошла проблема с сетью. Проверьте ваше интернет-соединение.");
       }
     });
 };
@@ -110,11 +138,11 @@ export function addTodoError() {
   addTodo(inputName.value, inputComments.value)
     .then((response) => {
       return response;
-    })
+    }) 
     .then((responseData) => {
       console.log(responseData);
       if (responseData.status === 500) {
-        throw new Error("Ошибка сервера");
+        throw new Error("Сломался сервер");
       } else {
         return responseData.json();
       }
@@ -131,10 +159,44 @@ export function addTodoError() {
     })
     .catch((error) => {
       alert(
-        "Проблема с сервером, делается повторный запрос."
+        "Ошибка сервера. Повторный запрос."
       );
       loadingElements.style.display = "block";
       formElements.style.display = "none";
       addTodoError();
     });
 }
+
+export function deleteTodo({ id }) {
+  return fetch(url + id, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  })
+    .then((response) => {
+      return response.json();
+    });
+}
+
+export const login = ({ login, password }) => {
+  return fetch(userUrl, {
+    method: "POST",
+    body: JSON.stringify({
+      login,
+      password,
+    }),
+  }).then((responseData) => {
+    if (responseData.status === 201) {
+      return responseData.json();
+    } else if (responseData.status === 400) {
+      throw new Error("Неверный логин или пароль");
+    }
+  }).catch((error) => {
+    if (error.message === "Неверный логин или пароль") {
+      alert("Введен неправильный логин или пароль!")
+    }
+  })
+};
+
+
