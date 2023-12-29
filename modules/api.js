@@ -1,5 +1,7 @@
 import { currentDate } from "./utils.js";
+import { now } from "./main.js";
 import { renderChangingMarkup } from "./render.js";
+import { format } from "date-fns";
 
 const textElementsLoad = document.querySelector(".text-load");
 const inputName = document.getElementById("form-name");
