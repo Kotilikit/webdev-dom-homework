@@ -1,41 +1,45 @@
-import { addedComments } from "./api.js";
-import { disablingButton } from "./utils.js";
-import { sedingsServer } from "./api.js";
-import { arrayOfComments } from "./api.js";
-import { renderChangingMarkup } from "./render.js";
-const button = document.querySelector(".add-form-button");
-const deleteLastComment = document.querySelector(".delete-last-comment");
-const inputName = document.querySelector(".add-form-name");
-const inputComments = document.querySelector(".add-form-text");
+import { startRender } from "./startRender.js";
+import { currentDate } from "./utils.js";
+
 const textElementsLoad = document.querySelector(".text-load");
 textElementsLoad.style.display = "block";
 
-addedComments();
+const url = "https://wedev-api.sky.pro/api/v2/daniil-kit/comments";
+export const startPage = () => {
+    return fetch(url, {
+        method: "GET",
+    })
+        .then((response) => {
+            return response.json();
+        })
+        .then((response) => {
+            textElementsLoad.style.display = "none";
+            return response;
+        })
+        .then((responseCommets) => {
+            const massComments = responseCommets.comments.map((comment) => {
+                return {
+                    name: comment.author.name,
+                    date: currentDate(new Date(comment.date)),
+                    text: comment.text,
+                    likes: comment.likes,
+                    islover: false,
+                    isEdit: false,
+                };
+            });
 
-button.addEventListener("click", () => {
-    inputName.classList.remove("error");
-    if (inputName.value === "") {
-        inputName.classList.add("error");
-    }
-    inputComments.classList.remove("error");
-    if (inputComments.value === "") {
-        inputComments.classList.add("error");
-        return;
-    }
+            console.log(massComments);
+            startRender({ massComments })
 
-    if (inputName.value === " ") {
-        return inputName.value.trim();
-    }
-    if (inputComments.value === " ") {
-        return inputComments.value.trim();
-    }
-    sedingsServer();
-});
+        })
+        .catch((error) => {
+            alert("Произошла проблема с сетью. Проверьте ваше интернет-соединение.");
+            console.error(error);
+        });
+};
 
-deleteLastComment.addEventListener("click", () => {
-    arrayOfComments.splice(arrayOfComments.length - 1, 1);
-    renderChangingMarkup();
-});
+startPage()
 
-inputName.addEventListener("input", disablingButton);
-inputComments.addEventListener("input", disablingButton);
+
+
+

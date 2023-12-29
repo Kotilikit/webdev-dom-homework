@@ -9,26 +9,15 @@
 
 <body>
   <div class="container">
-    <div class="text-load">
-      <p>Обновление ленты комментариев пожалуйста подождите!</p>
-    </div>
-    <ul class="comments">
-    </ul>
-    <br />
-    <div style="display: none; color: rgb(255, 255, 255)" class="loading-add">
-      <p>Комментарий добавляется</p>
-    </div>
-    <div class="add-form">
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-      <textarea id="text" type="textarea" class="add-form-text" placeholder="Введите ваш коментарий"
-        rows="4"></textarea>
-      <div class="add-form-row">
-        <button class="add-form-button">Написать</button>
+    <div id="app">
+      <div class="text-load">
+        <p>Обновление ленты комментариев, пожалуйста подождите!</p>
+      </div>
+      <div style="display: none; color: rgb(255, 255, 255)" class="loading-add">
+        <p>Комментарий добавляется</p>
       </div>
     </div>
-    <button class="delete-last-comment" id="deleteLastCommentButton">Удалить последний комментарий</button>
-  </div>
-
+  </div>  
   <script type="module" src="modules/main.js"></script>
 </body>
 

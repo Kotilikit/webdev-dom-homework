@@ -1,10 +1,6 @@
 import { arrayOfComments } from "./api.js";
 import { renderChangingMarkup } from "./render.js";
 
-const inputName = document.querySelector(".add-form-name");
-const inputComments = document.querySelector(".add-form-text");
-const button = document.querySelector(".add-form-button");
-
 export const currentDate = (data) => {
   const months = [
     "01",
@@ -32,7 +28,9 @@ export const currentDate = (data) => {
 };
 
 export const disablingButton = () => {
-  if (inputName.value && inputComments.value) {
+  const inputComments = document.getElementById("form-text");
+  const button = document.getElementById("form-button");
+  if (inputComments.value) {
     button.disabled = false;
   } else {
     button.disabled = true;
@@ -60,45 +58,45 @@ export const addingLikes = () => {
 };
 
 export const enterInput = () => {
-    document.addEventListener("keyup", (event) => {
-      if (event.key === "Enter")
-        document.querySelector(".add-form-row .add-form-button").click();
-    });
-  };
+  document.addEventListener("keyup", (event) => {
+    if (event.key === "Enter")
+      document.querySelector(".add-form-row .add-form-button").click();
+  });
+};
 
 export const changesComments = () => {
-    const buttonEditors = document.querySelectorAll(".save-button");
-  
-    for (const buttonEditor of buttonEditors) {
-      buttonEditor.addEventListener("click", (event) => {
-        event.stopPropagation();
-  
-        const index = buttonEditor.dataset.edit;
-  
-        if (arrayOfComments[index].isEdit) {
-          arrayOfComments[index].text = buttonEditor
-            .closest(".comment")
-            .querySelector("textarea").value;
-          arrayOfComments[index].isEdit = false;
-        } else {
-          arrayOfComments[index].isEdit = true;
-        }
-  
-        renderChangingMarkup();
-      });
-    }
-  };
+  const buttonEditors = document.querySelectorAll(".save-button");
+
+  for (const buttonEditor of buttonEditors) {
+    buttonEditor.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      const index = buttonEditor.dataset.edit;
+
+      if (arrayOfComments[index].isEdit) {
+        arrayOfComments[index].text = buttonEditor
+          .closest(".comment")
+          .querySelector("textarea").value;
+        arrayOfComments[index].isEdit = false;
+      } else {
+        arrayOfComments[index].isEdit = true;
+      }
+
+      renderChangingMarkup();
+    });
+  }
+};
 
 export const commentЕditor = () => {
-    const commentBodyElements = document.querySelectorAll(".comment");
-  
-    for (const commentBodyElement of commentBodyElements) {
-      commentBodyElement.addEventListener("click", () => {
-        const index = commentBodyElement.dataset.delete;
-  
-        inputComments.value = `${
-          arrayOfComments[index].text + " " + arrayOfComments[index].name + ":"
+  const commentBodyElements = document.querySelectorAll(".comment");
+  const inputComments = document.getElementById("form-text");
+
+  for (const commentBodyElement of commentBodyElements) {
+    commentBodyElement.addEventListener("click", () => {
+      const index = commentBodyElement.dataset.delete;
+      inputComments.value = `${arrayOfComments[index].text + " " + arrayOfComments[index].name + ":"
         }`;
-      });
-    }
-  };
+    });
+  }
+};
+
