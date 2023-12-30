@@ -1,5 +1,5 @@
 import { startRender } from "./startRender.js";
-// import { currentDate } from "./utils.js";
+import { currentDate } from "./utils.js";
 import { format } from "date-fns";
 
 const textElementsLoad = document.querySelector(".text-load");
@@ -22,7 +22,7 @@ export const startPage = () => {
             const massComments = responseCommets.comments.map((comment) => {
                 return {
                     name: comment.author.name,
-                    date: format(now, 'yyyy-MM-dd hh.mm.ss'),
+                    date: format(new Date(comment.date), 'yyyy-MM-dd hh.mm.ss'),
                     text: comment.text,
                     likes: comment.likes,
                     islover: false,

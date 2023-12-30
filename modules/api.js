@@ -53,7 +53,7 @@ export const addedComments = () => {
       const massComments = responseCommets.comments.map((comment) => {
         return {
           name: comment.author.name,
-          date: currentDate(new Date(comment.date)),
+          date: format(new Date(comment.date), 'yyyy-MM-dd hh.mm.ss'),
           text: comment.text,
           likes: comment.likes,
           islover: false,
